@@ -1,0 +1,14 @@
+{
+  "name": "kebapi",
+  "version": "0.0.0",
+  "description": "kebapi",
+  "main": "server.js",
+  "author": {
+    "name": ""
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^8.5.1",
+    "mysql": "^2.17.1"
+  }
+}
