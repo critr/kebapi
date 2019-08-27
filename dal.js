@@ -95,7 +95,7 @@ pool.on('release', (connection) => {
 async function dropDatabase() {
     let dropped = false;
     try {
-        const result = await pool.query(`DROP DATABASE IF EXISTS ${KEBAPI_DB_NAME};`);
+        const result = await pool.query(`DROP DATABASE IF EXISTS ??;`, [KEBAPI_DB_NAME]);
         dropped = true;
     } catch (err) {
         logger.error(err);
@@ -107,7 +107,7 @@ async function dropDatabase() {
 async function createDatabase() {
     let created = false;
     try {
-        const result = await pool.query(`CREATE DATABASE ${KEBAPI_DB_NAME};`);
+        const result = await pool.query(`CREATE DATABASE ??;`, [KEBAPI_DB_NAME]);
         created = true;
     } catch (err) {
         logger.error(err);
@@ -120,20 +120,20 @@ async function createTables() {
     let created = false;
     try {
         let result;
-        result = await pool.query(`CREATE TABLE ${DbTable.VENUES} (id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id), name VARCHAR(255), geo_lat DECIMAL(8,6), geo_lng DECIMAL(9,6), address VARCHAR(255), rating TINYINT);`);
-        result = await pool.query(`CREATE TABLE ${DbTable.LOOKUP_ROLES} (id TINYINT UNSIGNED NOT NULL, PRIMARY KEY (id), role VARCHAR(20) NOT NULL UNIQUE);`);
-        result = await pool.query(`CREATE TABLE ${DbTable.LOOKUP_USER_ACCOUNT_STATUS} (id TINYINT UNSIGNED NOT NULL, PRIMARY KEY (id), status VARCHAR(20) NOT NULL UNIQUE);`);
-        result = await pool.query(`CREATE TABLE ${DbTable.USERS} (
+        result = await pool.query(`CREATE TABLE ?? (id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id), name VARCHAR(255), geo_lat DECIMAL(8,6), geo_lng DECIMAL(9,6), address VARCHAR(255), rating TINYINT);`, [DbTable.VENUES]);
+        result = await pool.query(`CREATE TABLE ?? (id TINYINT UNSIGNED NOT NULL, PRIMARY KEY (id), role VARCHAR(20) NOT NULL UNIQUE);`, [DbTable.LOOKUP_ROLES]);
+        result = await pool.query(`CREATE TABLE ?? (id TINYINT UNSIGNED NOT NULL, PRIMARY KEY (id), status VARCHAR(20) NOT NULL UNIQUE);`, [DbTable.LOOKUP_USER_ACCOUNT_STATUS]);
+        result = await pool.query(`CREATE TABLE ?? (
             id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id),
             username VARCHAR(40) NOT NULL UNIQUE,
             name VARCHAR(50) NOT NULL,
             surname VARCHAR(50) NOT NULL,
             email VARCHAR(320) NOT NULL UNIQUE,
             password_hash CHAR(60) NOT NULL,
-            role_id TINYINT UNSIGNED, FOREIGN KEY (role_id) REFERENCES ${DbTable.LOOKUP_ROLES} (id),
-            account_status_id TINYINT UNSIGNED, FOREIGN KEY (account_status_id) REFERENCES ${DbTable.LOOKUP_USER_ACCOUNT_STATUS} (id)
-        );`);
-        result = await pool.query(`CREATE TABLE ${DbTable.USER_FAVOURITE_VENUES} (id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id), user_id INT UNSIGNED NOT NULL, venue_id INT UNSIGNED NOT NULL, UNIQUE(user_id, venue_id), FOREIGN KEY (user_id) REFERENCES ${DbTable.USERS}(id), FOREIGN KEY (venue_id) REFERENCES ${DbTable.VENUES} (id));`);
+            role_id TINYINT UNSIGNED, FOREIGN KEY (role_id) REFERENCES ?? (id),
+            account_status_id TINYINT UNSIGNED, FOREIGN KEY (account_status_id) REFERENCES ?? (id)
+        );`, [DbTable.USERS, DbTable.LOOKUP_ROLES, DbTable.LOOKUP_USER_ACCOUNT_STATUS]);
+        result = await pool.query(`CREATE TABLE ?? (id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id), user_id INT UNSIGNED NOT NULL, venue_id INT UNSIGNED NOT NULL, UNIQUE(user_id, venue_id), FOREIGN KEY (user_id) REFERENCES ?? (id), FOREIGN KEY (venue_id) REFERENCES ?? (id));`, [DbTable.USER_FAVOURITE_VENUES, DbTable.USERS, DbTable.VENUES]);
         created = true;
     } catch (err) {
         logger.error(err);
@@ -147,7 +147,7 @@ async function insertTestData() {
     try {
         let result;
         result = await pool.query(`
-            INSERT INTO ${DbTable.VENUES} (id, name, geo_lat, geo_lng, address, rating) VALUES 
+            INSERT INTO ?? (id, name, geo_lat, geo_lng, address, rating) VALUES 
             (1, 'Splendid Kebabs', 2, 1, '42 Bla Avenue, Madrid', 4),
             (2, 'The Kebaberie', 5, 2, '101 Santa Monica Way, Madrid', 3),
             (3, 'Meats Peeps', 7, 8, '276 Rita St, Madrid', 4),
@@ -155,36 +155,43 @@ async function insertTestData() {
             (5, 'The Dirty One', 4, 1, '10 Banana Place, Madrid', 5),
             (6, 'Bodrum Conundrum', 5, 5, '55 High Five Drive, Madrid', 2)
             ;
-        `);
+        `, [DbTable.VENUES]);
         result = await pool.query(`
-            INSERT INTO ${DbTable.LOOKUP_ROLES} (id, role) VALUES
-            (${Role.ADMIN}, 'admin'),        
-            (${Role.USER}, 'user')
+            INSERT INTO ?? (id, role) VALUES
+            (?, 'admin'),        
+            (?, 'user')
             ;
-        `);
+        `, [DbTable.LOOKUP_ROLES, Role.ADMIN, Role.USER]);
         result = await pool.query(`
-            INSERT INTO ${DbTable.LOOKUP_USER_ACCOUNT_STATUS} (id, status) VALUES
-            (${UserAccountStatus.ACTIVE}, 'active'),        
-            (${UserAccountStatus.INACTIVE}, 'inactive')
+            INSERT INTO ?? (id, status) VALUES
+            (?, 'active'),        
+            (?, 'inactive')
             ;
-        `);
+        `, [DbTable.LOOKUP_USER_ACCOUNT_STATUS, UserAccountStatus.ACTIVE, UserAccountStatus.INACTIVE]);
         result = await pool.query(`
-            INSERT INTO ${DbTable.USERS} (id, username, name, surname, email, password_hash, role_id, account_status_id) VALUES 
+            INSERT INTO ?? (id, username, name, surname, email, password_hash, role_id, account_status_id) VALUES 
             -- test hashes generated at: https://bcrypt-generator.com/
             -- plain pwd: bob1      rounds: 8   hash: $2y$08$9V7mg7B1O.m7vUTIizdTH.DjyiFOjPEa4tN/cQv9vwTv7.qbs7nu.
-            (1, 'aard', 'Bob', 'Smithers', 'aard@smithers.com', '$2y$08$9V7mg7B1O.m7vUTIizdTH.DjyiFOjPEa4tN/cQv9vwTv7.qbs7nu.', ${Role.ADMIN}, ${UserAccountStatus.ACTIVE}),                       
+            (1, 'aard', 'Bob', 'Smithers', 'aard@smithers.com', '$2y$08$9V7mg7B1O.m7vUTIizdTH.DjyiFOjPEa4tN/cQv9vwTv7.qbs7nu.', ?, ?),                       
             -- plain pwd: lucy1     rounds: 8   hash: $2y$08$NrLM7FPM9K/iYhCnnAL26.QWBkUTdr4aN9m0DVelbZvRMz/A3Qf5q
-            (2, 'Babs', 'Lucy', 'Matthews', 'babs@matthews.co.uk', '$2y$08$NrLM7FPM9K/iYhCnnAL26.QWBkUTdr4aN9m0DVelbZvRMz/A3Qf5q', ${Role.USER}, ${UserAccountStatus.ACTIVE}),                     
+            (2, 'Babs', 'Lucy', 'Matthews', 'babs@matthews.co.uk', '$2y$08$NrLM7FPM9K/iYhCnnAL26.QWBkUTdr4aN9m0DVelbZvRMz/A3Qf5q', ?, ?),                     
             -- plain pwd: percy1    rounds: 8   hash: $2y$08$wCDuc5ZmfwMp28GPmxP5uOejOvz3mkogp5KF3nkTwez3K8L8q.yFC
-            (3, 'MeatyMan', 'Percy', 'Archibald-Hyde', 'meatyman@archibald-hyde.eu', '$2y$08$wCDuc5ZmfwMp28GPmxP5uOejOvz3mkogp5KF3nkTwez3K8L8q.yFC', ${Role.USER}, ${UserAccountStatus.ACTIVE}),   
+            (3, 'MeatyMan', 'Percy', 'Archibald-Hyde', 'meatyman@archibald-hyde.eu', '$2y$08$wCDuc5ZmfwMp28GPmxP5uOejOvz3mkogp5KF3nkTwez3K8L8q.yFC', ?, ?),   
             -- plain pwd: farquhar1 rounds: 8   hash: $2y$08$Zz23B5j431OdTEP2oW0jDuc7krZkdNIXgK.cIILnQuZDTD2RKq2q6
-            (4, 'kAb0000B', 'Farquhar', 'Rogers', 'kAb0000B@rogers.me', '$2y$08$Zz23B5j431OdTEP2oW0jDuc7krZkdNIXgK.cIILnQuZDTD2RKq2q6', ${Role.USER}, ${UserAccountStatus.ACTIVE}),                
+            (4, 'kAb0000B', 'Farquhar', 'Rogers', 'kAb0000B@rogers.me', '$2y$08$Zz23B5j431OdTEP2oW0jDuc7krZkdNIXgK.cIILnQuZDTD2RKq2q6', ?, ?),                
             -- plain pwd: gigi1 rounds: 8   hash: $2y$08$jjz84rVjTkq0TrGQkxYKdejiCLLSzUdPLQTdsrDLDl.PeB/b0xv5y
-            (5, 'ItsGigi', 'Gigi', 'McInactive-User', 'gigi@gmail.com', '$2y$08$jjz84rVjTkq0TrGQkxYKdejiCLLSzUdPLQTdsrDLDl.PeB/b0xv5y', ${Role.USER}, ${UserAccountStatus.INACTIVE})
+            (5, 'ItsGigi', 'Gigi', 'McInactive-User', 'gigi@gmail.com', '$2y$08$jjz84rVjTkq0TrGQkxYKdejiCLLSzUdPLQTdsrDLDl.PeB/b0xv5y', ?, ?)
             ;
-        `);
+        `, [
+                DbTable.USERS,                
+                Role.ADMIN, UserAccountStatus.ACTIVE,
+                Role.USER, UserAccountStatus.ACTIVE,
+                Role.USER, UserAccountStatus.ACTIVE,
+                Role.USER, UserAccountStatus.ACTIVE,
+                Role.USER, UserAccountStatus.INACTIVE
+            ]);
         result = await pool.query(`
-            INSERT INTO ${DbTable.USER_FAVOURITE_VENUES} (id, user_id, venue_id) VALUES 
+            INSERT INTO ?? (id, user_id, venue_id) VALUES 
             (1, 1, 5), -- aard has favourited The Dirty One
             (2, 1, 4), -- aard has favourited The Rotisserie
             (3, 2, 3), -- Babs has favourited Meats Peeps
@@ -192,7 +199,7 @@ async function insertTestData() {
             (5, 2, 2), -- Babs has favourited The Kebaberie
             (6, 4, 6)  -- kAb0000B has Bodrum Conundrum 
             ;
-        `);
+        `, [DbTable.USER_FAVOURITE_VENUES]);
 
         inserted = true;
     } catch (err) {
@@ -224,7 +231,7 @@ async function resetTestDB() {
 async function checkDBExists() {
     let exists = false;
     try {
-        const result = await pool.query(`SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${KEBAPI_DB_NAME}';`);
+        const result = await pool.query(`SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?;`, [KEBAPI_DB_NAME]);
         if (result[0] && result[0].SCHEMA_NAME && result[0].SCHEMA_NAME === KEBAPI_DB_NAME) {
             exists = true;
         }
@@ -238,7 +245,7 @@ async function checkDBExists() {
 async function setTargetDB() {
     let set = false;
     try {
-        const result = await pool.query(`USE ${KEBAPI_DB_NAME};`);
+        const result = await pool.query(`USE ??;`, [KEBAPI_DB_NAME]);
         set = true;
     } catch (err) {
         logger.error(err);
@@ -250,7 +257,7 @@ async function setTargetDB() {
 async function checkTableExists(tableName) {
     let exists = false;
     try {
-        const result = await pool.query(`SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '${KEBAPI_DB_NAME}' AND TABLE_NAME = '${tableName}' LIMIT 1;`);
+        const result = await pool.query(`SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? LIMIT 1;`, [KEBAPI_DB_NAME, tableName]);
         if (result[0] && result[0].TABLE_NAME && result[0].TABLE_NAME === tableName) {
             exists = true;
         }
@@ -293,7 +300,7 @@ async function getVenue(id) {
     let result = new Array();
     let venueId = parseId(id);
     try {
-        result = await pool.query(`SELECT id, name, geo_lat, geo_lng, address FROM ${DbTable.VENUES} WHERE id = ${venueId};`);
+        result = await pool.query(`SELECT id, name, geo_lat, geo_lng, address FROM ?? WHERE id = ?;`, [DbTable.VENUES, venueId]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -305,7 +312,7 @@ async function getVenues(startRow, maxRows) {
     try {
         let offset = parseStartRow(startRow);
         let limit = parseMaxRows(maxRows);
-        result = await pool.query(`SELECT id, name FROM ${DbTable.VENUES} LIMIT ${offset}, ${limit};`);
+        result = await pool.query(`SELECT id, name FROM ?? LIMIT ?, ?;`, [DbTable.VENUES, offset, limit]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -321,7 +328,7 @@ async function addUser(username, name, surname, email, passwordHash, roleId) {
     let insertId; 
     try {
         // Account status id will default to UserAccountStatus.ACTIVE
-        const result = await pool.query(`INSERT IGNORE INTO ${DbTable.USERS} (username, name, surname, email, password_hash, role_id, account_status_id) VALUES ('${username}', '${name}', '${surname}', '${email}', '${passwordHash}', '${roleId}', '${UserAccountStatus.ACTIVE}');`);
+        const result = await pool.query(`INSERT IGNORE INTO ?? (username, name, surname, email, password_hash, role_id, account_status_id) VALUES (?, ?, ?, ?, ?, ?, ?);`, [DbTable.USERS, username, name, surname, email, passwordHash, roleId, UserAccountStatus.ACTIVE]);
         if (result.insertId > 0) {
             insertId = result.insertId;
         } else if (result.insertId === 0 && result.warningCount > 0) {
@@ -344,7 +351,7 @@ async function activateUser(id) {
     let result = new Array();
     let userId = parseId(id);
     try {
-        result = await pool.query(`UPDATE ${DbTable.USERS} SET account_status_id = ${UserAccountStatus.ACTIVE} WHERE id = ${userId} LIMIT 1;`);        
+        result = await pool.query(`UPDATE ?? SET account_status_id = ? WHERE id = ? LIMIT 1;`, [DbTable.USERS, UserAccountStatus.ACTIVE, userId]);        
         return updateOK(result);
     } catch (err) {
         logger.error(err);
@@ -355,7 +362,7 @@ async function deactivateUser(id) {
     let result = new Array();
     let userId = parseId(id);
     try {
-        result = await pool.query(`UPDATE ${DbTable.USERS} SET account_status_id = ${UserAccountStatus.INACTIVE} WHERE id = ${userId} LIMIT 1;`);
+        result = await pool.query(`UPDATE ?? SET account_status_id = ? WHERE id = ? LIMIT 1;`, [DbTable.USERS, UserAccountStatus.INACTIVE, userId]);
         return updateOK(result);
     } catch (err) {
         logger.error(err);
@@ -366,7 +373,7 @@ async function getUser(id) {
     let result = new Array();
     let userId = parseId(id);
     try {
-        result = await pool.query(`SELECT id, username, name, surname, email, password_hash, role_id, account_status_id FROM ${DbTable.USERS} WHERE id = ${userId};`);
+        result = await pool.query(`SELECT id, username, name, surname, email, password_hash, role_id, account_status_id FROM ?? WHERE id = ?;`, [DbTable.USERS, userId]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -377,7 +384,7 @@ async function getUserByEmail(email) {
     let result = new Array();
     let userEmail = parseEmail(email);
     try {
-        result = await pool.query(`SELECT id, username, name, surname, email, password_hash, role_id, account_status_id FROM ${DbTable.USERS} WHERE email = '${userEmail}';`);
+        result = await pool.query(`SELECT id, username, name, surname, email, password_hash, role_id, account_status_id FROM ?? WHERE email = ?;`, [DbTable.USERS, userEmail]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -388,7 +395,7 @@ async function getUserByUserName(userName) {
     let result = new Array();
     let uname = parseString(userName);
     try {
-        result = await pool.query(`SELECT id, username, name, surname, email, password_hash, role_id, account_status_id FROM ${DbTable.USERS} WHERE username = '${uname}';`);
+        result = await pool.query(`SELECT id, username, name, surname, email, password_hash, role_id, account_status_id FROM ?? WHERE username = ?;`, [DbTable.USERS, uname]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -399,7 +406,7 @@ async function getUserRole(id) {
     let result = new Array();
     let userId = parseId(id);
     try {
-        result = await pool.query(`SELECT r.id, role FROM ${DbTable.LOOKUP_ROLES} AS r INNER JOIN ${DbTable.USERS} AS u ON r.id = u.role_id WHERE u.id = ${userId};`);
+        result = await pool.query(`SELECT r.id, role FROM ?? AS r INNER JOIN ?? AS u ON r.id = u.role_id WHERE u.id = ?;`, [DbTable.LOOKUP_ROLES, DbTable.USERS, userId]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -410,7 +417,7 @@ async function getUserAccountStatus(id) {
     let result = new Array();
     let userId = parseId(id);
     try {
-        result = await pool.query(`SELECT uas.id, status FROM ${DbTable.LOOKUP_USER_ACCOUNT_STATUS} AS uas INNER JOIN ${DbTable.USERS} AS u ON uas.id = u.account_status_id WHERE u.id = ${userId};`);
+        result = await pool.query(`SELECT uas.id, status FROM ?? AS uas INNER JOIN ?? AS u ON uas.id = u.account_status_id WHERE u.id = ?;`, [DbTable.LOOKUP_USER_ACCOUNT_STATUS, DbTable.USERS, userId]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -423,7 +430,7 @@ async function getUsers(startRow, maxRows) {
     try {
         let offset = parseStartRow(startRow);
         let limit = parseMaxRows(maxRows);
-        result = await pool.query(`SELECT id, username FROM ${DbTable.USERS} LIMIT ${offset}, ${limit};`);
+        result = await pool.query(`SELECT id, username FROM ?? LIMIT ?, ?;`, [DbTable.USERS, offset, limit]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -437,7 +444,7 @@ async function getUserFavourites(id, startRow, maxRows) {
         let userId = parseId(id);
         let offset = parseStartRow(startRow);
         let limit = parseMaxRows(maxRows);
-        result = await pool.query(`SELECT venues.id, venues.name FROM ${DbTable.VENUES} AS venues INNER JOIN ${DbTable.USER_FAVOURITE_VENUES} AS favourites ON venues.id = favourites.venue_id WHERE favourites.user_id = ${userId} ORDER BY venues.name LIMIT ${offset}, ${limit};`);
+        result = await pool.query(`SELECT venues.id, venues.name FROM ?? AS venues INNER JOIN ?? AS favourites ON venues.id = favourites.venue_id WHERE favourites.user_id = ? ORDER BY venues.name LIMIT ?, ?;`, [DbTable.VENUES, DbTable.USER_FAVOURITE_VENUES, userId, offset, limit]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -449,7 +456,7 @@ async function addUserFavourite(id, venueID) {
     // 0 if insert is duplicate (so 0 can indicate to a calling fn that no action is needed)
     let insertId;
     try {
-        const result = await pool.query(`INSERT IGNORE INTO ${DbTable.USER_FAVOURITE_VENUES} (user_id, venue_id) VALUES (${id}, ${venueID});`);
+        const result = await pool.query(`INSERT IGNORE INTO ?? (user_id, venue_id) VALUES (?, ?);`, [DbTable.USER_FAVOURITE_VENUES, id, venueID]);
         if (result.insertId > 0) {
             // Row was inserted, insertId will be id of newly inserted row
             insertId = result.insertId;
@@ -472,7 +479,7 @@ async function addUserFavourite(id, venueID) {
 async function removeUserFavourite(id, venueID) {
     let removed = false;
     try {
-        const result = await pool.query(`DELETE FROM ${DbTable.USER_FAVOURITE_VENUES} WHERE user_id = ${id} AND venue_id = ${venueID};`);
+        const result = await pool.query(`DELETE FROM ?? WHERE user_id = ? AND venue_id = ?;`, [DbTable.USER_FAVOURITE_VENUES, id, venueID]);
         if (result.affectedRows) {
             removed = true;
         }
