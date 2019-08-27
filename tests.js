@@ -229,6 +229,33 @@ const adminTestCollection = {
     //    return await runTestCases(test, testCases);
     //},
 
+    'api.registerUser registering a user should return expected Object': async (test) => {
+        let testFn = api.registerUser;
+        let assertFn = assert.deepEqual;
+        let testCases = [
+            {
+                given: {
+                    username: "minmin",
+                    name: "Mina",
+                    surname: "Shin",
+                    email: "shinminhwa@gmail.com",
+                    password: "mina1"
+                },
+                expected: {
+                    "responseCode": 200,
+                    "responseStatus": "OK",
+                    "response": {
+                        "result": 6,
+                        "msg": "User registered."
+                    }
+                },
+                testFn: testFn,
+                assertFn: assertFn
+            }
+        ];
+
+        return await runTestCases(test, testCases);
+    },
     'api.getUser existing user should return expected fields': async (test) => {
         // Existing users will have response[0] in the response object. Do not include non-existing users with this test function.
         let testFn = async (given) => { let result = await api.getUser(given); return getResultSubset(result.response[0], ['id', 'username', 'name']); };
