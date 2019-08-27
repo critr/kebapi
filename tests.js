@@ -256,6 +256,42 @@ const adminTestCollection = {
 
         return await runTestCases(test, testCases);
     },
+    'api.deactivateUser deactivating a user should return expected Object': async (test) => {
+        let testFn = api.deactivateUser;
+        let assertFn = assert.deepEqual;
+        let testCases = [
+            {
+                given: { id: 6 },
+                expected: {
+                    "responseCode": 200,
+                    "responseStatus": "OK",
+                    "response": true
+                },
+                testFn: testFn,
+                assertFn: assertFn
+            }
+        ];
+
+        return await runTestCases(test, testCases);
+    },
+    'api.activateUser activating a user should return expected Object': async (test) => {
+        let testFn = api.activateUser;
+        let assertFn = assert.deepEqual;
+        let testCases = [
+            {
+                given: { id: 6 },
+                expected: {
+                    "responseCode": 200,
+                    "responseStatus": "OK",
+                    "response": true
+                },
+                testFn: testFn,
+                assertFn: assertFn
+            }
+        ];
+
+        return await runTestCases(test, testCases);
+    },
     'api.getUser existing user should return expected fields': async (test) => {
         // Existing users will have response[0] in the response object. Do not include non-existing users with this test function.
         let testFn = async (given) => { let result = await api.getUser(given); return getResultSubset(result.response[0], ['id', 'username', 'name']); };
