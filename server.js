@@ -420,12 +420,17 @@ async function getPostData(req) {
             // Unknown if it's possible to 'end' a request with a different content-type to how it began, but this should
             // guard against that, in addition to choosing the type of parsing required.
             let parsedData = undefined; 
-            if (contentType === APP_FORM_URLENCODED) {
-                // Parse as Form data
-                parsedData = qs.parse(data);
-            } else if (contentType === APP_JSON) {
-                // Parse as JSON data
-                parsedData = JSON.parse(data);
+            try {
+                if (contentType === APP_FORM_URLENCODED) {
+                    // Parse as Form data
+                    parsedData = qs.parse(data);
+                } else if (contentType === APP_JSON) {
+                    // Parse as JSON data
+                    parsedData = JSON.parse(data);
+                }
+            } catch (err) {
+                logger.error(err);
+                reject(`An error ocurred parsing received data (Content-Type was '${contentType}').`);
             }
             resolve(parsedData);
         });
