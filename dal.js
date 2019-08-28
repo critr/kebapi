@@ -62,33 +62,57 @@ const UserAccountStatus = Object.freeze({
 
 /* - - - - - Connection pool - - - - - */
 
-const pool = mysql.createPool({
-    connectionLimit: KEBAPI_DB_POOL_CONNECTION_LIMIT,
-    host: KEBAPI_DB_HOST,
-    user: KEBAPI_DB_USER,
-    password: KEBAPI_DB_PASSWORD,
-    charset: KEBAPI_DB_CHARSET, //'utf8mb4', //'utf8_general_ci',
-    timezone: KEBAPI_DB_TIMEZONE
-});
+let pool; // Going with a global for use in this module. Requires calling initialisePool to thoroughly mutate it into something useful.
 
 
-// Promisify pool
-pool.query = util.promisify(pool.query).bind(pool); // binds 'this' to pool
+(function initialise() {
+    logger.info('> initialise');
+    try {
+        // Set up the pool
+        pool = initialisePool(pool);
 
-// Some connection event logging
-pool.on('acquire', (connection) => {
-    logger.info('Connection id %d acquired', connection.threadId);
-});
-pool.on('connection', (connection) => {
-    logger.info('Connection id %d connected', connection.threadId);
-});
-pool.on('enqueue', () => {
-    logger.info('Waiting for available connection slot');
-});
-pool.on('release', (connection) => {
-    logger.info('Connection id %d released', connection.threadId);
-});
+    } catch (err) {
+        logger.error(err);
+        //Don't throw unless this fn is wrapped in the future because it won't be caught by anything and stop the server.
+    }
+    logger.info('< initialise');
+})();
 
+function initialisePool(connectionPool) {
+    try {
+        connectionPool = mysql.createPool({
+            connectionLimit: KEBAPI_DB_POOL_CONNECTION_LIMIT,
+            host: KEBAPI_DB_HOST,
+            user: KEBAPI_DB_USER,
+            password: KEBAPI_DB_PASSWORD,
+            charset: KEBAPI_DB_CHARSET, //'utf8mb4', //'utf8_general_ci',
+            timezone: KEBAPI_DB_TIMEZONE
+        });
+
+        // Promisify pool
+        connectionPool.query = util.promisify(connectionPool.query).bind(connectionPool); // binds 'this' to pool
+
+        // Some connection event logging
+        connectionPool.on('acquire', (connection) => {
+            logger.info(`Connection id ${connection.threadId} acquired`);
+        });
+        connectionPool.on('connection', (connection) => {
+            logger.info(`Connection id ${connection.threadId} connected`);
+        });
+        connectionPool.on('enqueue', () => {
+            logger.info(`Waiting for available connection slot`);
+        });
+        connectionPool.on('release', (connection) => {
+            logger.info(`Connection id ${connection.threadId} released`);
+        });
+
+    } catch (err) {
+        logger.error(err);
+        throw err;
+    }
+
+    return connectionPool;
+}
 
 /* - - - - - Database utility and maintenance - - - - - */
 
