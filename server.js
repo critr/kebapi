@@ -392,24 +392,41 @@ async function route(req, postData = {}) {
 }
 
 /*
-  Collects any POST data.
+  Collects any POST data. Currently supports:
+    . application/json
+    . application/x-www-form-urlencoded
  */
 async function getPostData(req) {
-    const FORM_URLENCODED = 'application/x-www-form-urlencoded';
+    const APP_JSON = 'application/json';
+    const APP_FORM_URLENCODED = 'application/x-www-form-urlencoded';
     let data = '';
     return new Promise((resolve, reject) => {
-        if (req.headers['content-type'] !== FORM_URLENCODED) {
-            reject(`POST data content-type must be '${FORM_URLENCODED}', instead received '${req.headers['content-type']}'`);
+        // Reject if we're not receiving one of the accepted content-types
+        if (![APP_FORM_URLENCODED, APP_JSON].includes(req.headers['content-type'])) {
+            reject(`POST data content-type must be '${APP_FORM_URLENCODED}' or '${APP_JSON}', instead received '${req.headers['content-type']}'`);
         }
-        req.on('data', dataChunk => {
+        // Receive data chunks
+        req.on('data', (dataChunk) => {
+            // Append chunk to data received so far
             data += dataChunk.toString();
             // Stop receiving if we're being sent too much data because it could crash the server/be used as exploit.
             if (data.length > KEBAPI_SERVER_POST_MAX_SIZE) {
                 reject(`POST data size limit exceeded. Too much data sent.`);
             }
         });
-        req.on('end', () => {
-            let parsedData = qs.parse(data);
+        req.on('end', (contentType = req.headers['content-type']) => {
+            // NOTE: parsedData will be undefined, and intended to be so, if data wasn't received from one of the accepted
+            // content-types. i.e. if we're not expecting the content type, we'll resolve as if no data was received.
+            // Unknown if it's possible to 'end' a request with a different content-type to how it began, but this should
+            // guard against that, in addition to choosing the type of parsing required.
+            let parsedData = undefined; 
+            if (contentType === APP_FORM_URLENCODED) {
+                // Parse as Form data
+                parsedData = qs.parse(data);
+            } else if (contentType === APP_JSON) {
+                // Parse as JSON data
+                parsedData = JSON.parse(data);
+            }
             resolve(parsedData);
         });
         
