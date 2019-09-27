@@ -1,6 +1,6 @@
 ﻿/**
  * An asynchronous Promise-based Data Access Layer built around a MySQL database with connection pooling.
- * 
+ *
  * */
 
 // MySQL NOTE: Due to changed security, MySQL80 will require executing something
@@ -27,7 +27,8 @@ const {
     KEBAPI_DB_USER,
     KEBAPI_DB_PASSWORD,
     KEBAPI_DB_CHARSET,
-    KEBAPI_DB_TIMEZONE
+    KEBAPI_DB_TIMEZONE,
+    KEBAPI_DB_MAX_PATH_SIZE
 } = require('./config');
 
 
@@ -38,7 +39,8 @@ const DbTable = Object.freeze({
     USERS: 'users',
     USER_FAVOURITE_VENUES: 'user_favourite_venues',
     LOOKUP_ROLES: 'lookup_roles',
-    LOOKUP_USER_ACCOUNT_STATUS: 'lookup_user_account_status'
+    LOOKUP_USER_ACCOUNT_STATUS: 'lookup_user_account_status',
+    MEDIA: 'media'
 });
 
 // Collection (Array) of all database tables we are using. (Used by checkTablesExist() for instance.)
@@ -144,9 +146,14 @@ async function createTables() {
     let created = false;
     try {
         let result;
-        result = await pool.query(`CREATE TABLE ?? (id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id), name VARCHAR(255), geo_lat DECIMAL(8,6), geo_lng DECIMAL(9,6), address VARCHAR(255), rating TINYINT);`, [DbTable.VENUES]);
+
+        // lookup_roles
         result = await pool.query(`CREATE TABLE ?? (id TINYINT UNSIGNED NOT NULL, PRIMARY KEY (id), role VARCHAR(20) NOT NULL UNIQUE);`, [DbTable.LOOKUP_ROLES]);
+
+        // lookup_user_account_status
         result = await pool.query(`CREATE TABLE ?? (id TINYINT UNSIGNED NOT NULL, PRIMARY KEY (id), status VARCHAR(20) NOT NULL UNIQUE);`, [DbTable.LOOKUP_USER_ACCOUNT_STATUS]);
+
+        // users
         result = await pool.query(`CREATE TABLE ?? (
             id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id),
             username VARCHAR(40) NOT NULL UNIQUE,
@@ -157,7 +164,28 @@ async function createTables() {
             role_id TINYINT UNSIGNED, FOREIGN KEY (role_id) REFERENCES ?? (id),
             account_status_id TINYINT UNSIGNED, FOREIGN KEY (account_status_id) REFERENCES ?? (id)
         );`, [DbTable.USERS, DbTable.LOOKUP_ROLES, DbTable.LOOKUP_USER_ACCOUNT_STATUS]);
+
+        // media
+        result = await pool.query(`CREATE TABLE ?? (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id),                  -- PK
+            user_id INT UNSIGNED NOT NULL, FOREIGN KEY (user_id) REFERENCES ?? (id),    -- ID of uploader. Should be a registered user, even if admin or some special user set up for media uploads.
+            media_path VARCHAR(?) NOT NULL                                              -- Media paths including name but not including a fixed root, e.g. imagename.jpg or somepath\imagename.jpg
+        );`, [DbTable.MEDIA, DbTable.USERS, KEBAPI_DB_MAX_PATH_SIZE]);
+
+        // venues
+        result = await pool.query(`CREATE TABLE ?? (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id),
+            name VARCHAR(255),
+            geo_lat DECIMAL(8,6),
+            geo_lng DECIMAL(9,6),
+            address VARCHAR(255),
+            rating TINYINT,
+            main_media_id INT UNSIGNED NOT NULL, FOREIGN KEY (main_media_id) REFERENCES ?? (id)
+        );`, [DbTable.VENUES, DbTable.MEDIA]);
+
+        // user_favourite_venues
         result = await pool.query(`CREATE TABLE ?? (id INT UNSIGNED NOT NULL AUTO_INCREMENT, PRIMARY KEY (id), user_id INT UNSIGNED NOT NULL, venue_id INT UNSIGNED NOT NULL, UNIQUE(user_id, venue_id), FOREIGN KEY (user_id) REFERENCES ?? (id), FOREIGN KEY (venue_id) REFERENCES ?? (id));`, [DbTable.USER_FAVOURITE_VENUES, DbTable.USERS, DbTable.VENUES]);
+
         created = true;
     } catch (err) {
         logger.error(err);
@@ -170,58 +198,81 @@ async function insertTestData() {
     let inserted = false;
     try {
         let result;
-        result = await pool.query(`
-            INSERT INTO ?? (id, name, geo_lat, geo_lng, address, rating) VALUES 
-            (1, 'Splendid Kebabs', 2, 1, '42 Bla Avenue, Madrid', 4),
-            (2, 'The Kebaberie', 5, 2, '101 Santa Monica Way, Madrid', 3),
-            (3, 'Meats Peeps', 7, 8, '276 Rita St, Madrid', 4),
-            (4, 'The Rotisserie', 1, 9, '7 Rick Road, Madrid', 3),
-            (5, 'The Dirty One', 4, 1, '10 Banana Place, Madrid', 5),
-            (6, 'Bodrum Conundrum', 5, 5, '55 High Five Drive, Madrid', 2)
-            ;
-        `, [DbTable.VENUES]);
+
+        // lookup_roles
         result = await pool.query(`
             INSERT INTO ?? (id, role) VALUES
-            (?, 'admin'),        
+            (?, 'admin'),
             (?, 'user')
             ;
         `, [DbTable.LOOKUP_ROLES, Role.ADMIN, Role.USER]);
+
+        // lookup_user_account_status
         result = await pool.query(`
             INSERT INTO ?? (id, status) VALUES
-            (?, 'active'),        
+            (?, 'active'),
             (?, 'inactive')
             ;
         `, [DbTable.LOOKUP_USER_ACCOUNT_STATUS, UserAccountStatus.ACTIVE, UserAccountStatus.INACTIVE]);
+
+        // users
         result = await pool.query(`
-            INSERT INTO ?? (id, username, name, surname, email, password_hash, role_id, account_status_id) VALUES 
+            INSERT INTO ?? (id, username, name, surname, email, password_hash, role_id, account_status_id) VALUES
             -- test hashes generated at: https://bcrypt-generator.com/
             -- plain pwd: bob1      rounds: 8   hash: $2y$08$9V7mg7B1O.m7vUTIizdTH.DjyiFOjPEa4tN/cQv9vwTv7.qbs7nu.
-            (1, 'aard', 'Bob', 'Smithers', 'aard@smithers.com', '$2y$08$9V7mg7B1O.m7vUTIizdTH.DjyiFOjPEa4tN/cQv9vwTv7.qbs7nu.', ?, ?),                       
+            (1, 'aard', 'Bob', 'Smithers', 'aard@smithers.com', '$2y$08$9V7mg7B1O.m7vUTIizdTH.DjyiFOjPEa4tN/cQv9vwTv7.qbs7nu.', ?, ?),
             -- plain pwd: lucy1     rounds: 8   hash: $2y$08$NrLM7FPM9K/iYhCnnAL26.QWBkUTdr4aN9m0DVelbZvRMz/A3Qf5q
-            (2, 'Babs', 'Lucy', 'Matthews', 'babs@matthews.co.uk', '$2y$08$NrLM7FPM9K/iYhCnnAL26.QWBkUTdr4aN9m0DVelbZvRMz/A3Qf5q', ?, ?),                     
+            (2, 'Babs', 'Lucy', 'Matthews', 'babs@matthews.co.uk', '$2y$08$NrLM7FPM9K/iYhCnnAL26.QWBkUTdr4aN9m0DVelbZvRMz/A3Qf5q', ?, ?),
             -- plain pwd: percy1    rounds: 8   hash: $2y$08$wCDuc5ZmfwMp28GPmxP5uOejOvz3mkogp5KF3nkTwez3K8L8q.yFC
-            (3, 'MeatyMan', 'Percy', 'Archibald-Hyde', 'meatyman@archibald-hyde.eu', '$2y$08$wCDuc5ZmfwMp28GPmxP5uOejOvz3mkogp5KF3nkTwez3K8L8q.yFC', ?, ?),   
+            (3, 'MeatyMan', 'Percy', 'Archibald-Hyde', 'meatyman@archibald-hyde.eu', '$2y$08$wCDuc5ZmfwMp28GPmxP5uOejOvz3mkogp5KF3nkTwez3K8L8q.yFC', ?, ?),
             -- plain pwd: farquhar1 rounds: 8   hash: $2y$08$Zz23B5j431OdTEP2oW0jDuc7krZkdNIXgK.cIILnQuZDTD2RKq2q6
-            (4, 'kAb0000B', 'Farquhar', 'Rogers', 'kAb0000B@rogers.me', '$2y$08$Zz23B5j431OdTEP2oW0jDuc7krZkdNIXgK.cIILnQuZDTD2RKq2q6', ?, ?),                
+            (4, 'kAb0000B', 'Farquhar', 'Rogers', 'kAb0000B@rogers.me', '$2y$08$Zz23B5j431OdTEP2oW0jDuc7krZkdNIXgK.cIILnQuZDTD2RKq2q6', ?, ?),
             -- plain pwd: gigi1 rounds: 8   hash: $2y$08$jjz84rVjTkq0TrGQkxYKdejiCLLSzUdPLQTdsrDLDl.PeB/b0xv5y
             (5, 'ItsGigi', 'Gigi', 'McInactive-User', 'gigi@gmail.com', '$2y$08$jjz84rVjTkq0TrGQkxYKdejiCLLSzUdPLQTdsrDLDl.PeB/b0xv5y', ?, ?)
             ;
         `, [
-                DbTable.USERS,                
+                DbTable.USERS,
                 Role.ADMIN, UserAccountStatus.ACTIVE,
                 Role.USER, UserAccountStatus.ACTIVE,
                 Role.USER, UserAccountStatus.ACTIVE,
                 Role.USER, UserAccountStatus.ACTIVE,
                 Role.USER, UserAccountStatus.INACTIVE
             ]);
+
+        // media
         result = await pool.query(`
-            INSERT INTO ?? (id, user_id, venue_id) VALUES 
+            -- NOTE: user_id 1 matches admin
+            INSERT INTO ?? (id, user_id, media_path) VALUES
+            (1, 1, 'image\\1.jpg'),
+            (2, 1, 'image\\2.jpg'),
+            (3, 1, 'image\\3.jpg'),
+            (4, 1, 'image\\4.jpg'),
+            (5, 1, 'image\\5.jpg'),
+            (6, 1, 'image\\6.jpg')
+            ;
+        `, [DbTable.MEDIA]);
+
+        // venues
+        result = await pool.query(`
+            INSERT INTO ?? (id, name, geo_lat, geo_lng, address, rating, main_media_id) VALUES
+            (1, 'Splendid Kebabs', 2, 1, '42 Bla Avenue, Madrid', 4, 1),
+            (2, 'The Kebaberie', 5, 2, '101 Santa Monica Way, Madrid', 3, 2),
+            (3, 'Meats Peeps', 7, 8, '276 Rita St, Madrid', 4, 3),
+            (4, 'The Rotisserie', 1, 9, '7 Rick Road, Madrid', 3, 4),
+            (5, 'The Dirty One', 4, 1, '10 Banana Place, Madrid', 5, 5),
+            (6, 'Bodrum Conundrum', 5, 5, '55 High Five Drive, Madrid', 2, 6)
+            ;
+        `, [DbTable.VENUES]);
+
+        // user_favourite_venues
+        result = await pool.query(`
+            INSERT INTO ?? (id, user_id, venue_id) VALUES
             (1, 1, 5), -- aard has favourited The Dirty One
             (2, 1, 4), -- aard has favourited The Rotisserie
             (3, 2, 3), -- Babs has favourited Meats Peeps
             (4, 2, 4), -- Babs has favourited The Rotisserie
             (5, 2, 2), -- Babs has favourited The Kebaberie
-            (6, 4, 6)  -- kAb0000B has Bodrum Conundrum 
+            (6, 4, 6)  -- kAb0000B has Bodrum Conundrum
             ;
         `, [DbTable.USER_FAVOURITE_VENUES]);
 
@@ -324,7 +375,21 @@ async function getVenue(id) {
     let result = new Array();
     let venueId = parseId(id);
     try {
-        result = await pool.query(`SELECT id, name, geo_lat, geo_lng, address FROM ?? WHERE id = ?;`, [DbTable.VENUES, venueId]);
+        result = await pool.query(`
+            SELECT
+                v.id,
+                v.name,
+                v.geo_lat,
+                v.geo_lng,
+                v.address,
+                v.rating,
+                m.media_path AS main_media_path
+            FROM ?? AS v
+            INNER JOIN ?? AS m
+            ON v.main_media_id = m.id
+            WHERE v.id = ?
+            LIMIT 1
+        ;`, [DbTable.VENUES, DbTable.MEDIA, venueId]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -336,7 +401,15 @@ async function getVenues(startRow, maxRows) {
     try {
         let offset = parseStartRow(startRow);
         let limit = parseMaxRows(maxRows);
-        result = await pool.query(`SELECT id, name FROM ?? LIMIT ?, ?;`, [DbTable.VENUES, offset, limit]);
+        result = await pool.query(`
+            SELECT
+                v.id,
+                v.name,
+                m.media_path AS main_media_path
+            FROM ?? AS v
+            INNER JOIN ?? AS m
+            ON v.main_media_id = m.id
+            LIMIT ?, ?;`, [DbTable.VENUES, DbTable.MEDIA, offset, limit]);
     } catch (err) {
         logger.error(err);
         throw err;
@@ -349,7 +422,7 @@ async function getVenues(startRow, maxRows) {
 async function addUser(username, name, surname, email, passwordHash, roleId) {
     // insertId Will remain undefined if no insert occurs, or be newly inserted row number, or be
     // 0 if insert is duplicate (so 0 can indicate to a calling fn that no action is needed)
-    let insertId; 
+    let insertId;
     try {
         // Account status id will default to UserAccountStatus.ACTIVE
         const result = await pool.query(`INSERT IGNORE INTO ?? (username, name, surname, email, password_hash, role_id, account_status_id) VALUES (?, ?, ?, ?, ?, ?, ?);`, [DbTable.USERS, username, name, surname, email, passwordHash, roleId, UserAccountStatus.ACTIVE]);
@@ -375,7 +448,7 @@ async function activateUser(id) {
     let result = new Array();
     let userId = parseId(id);
     try {
-        result = await pool.query(`UPDATE ?? SET account_status_id = ? WHERE id = ? LIMIT 1;`, [DbTable.USERS, UserAccountStatus.ACTIVE, userId]);        
+        result = await pool.query(`UPDATE ?? SET account_status_id = ? WHERE id = ? LIMIT 1;`, [DbTable.USERS, UserAccountStatus.ACTIVE, userId]);
         return updateOK(result);
     } catch (err) {
         logger.error(err);
@@ -522,7 +595,7 @@ async function removeUserFavourite(id, venueID) {
 
 function parseId(id) {
     // If it can't be converted to a number, default to a numeric non-existent id that cannot be found or operated upon
-    return Number(id) || -1; 
+    return Number(id) || -1;
 }
 function parseEmail(email) {
     //TODO: Do proper email validation. Only ensuring it's a string for now
@@ -546,7 +619,7 @@ function updateOK(result) {
     if (result.affectedRows > 0 && (result.changedRows === 0 || result.changedRows === 1))
         return true;
     else
-        return false;    
+        return false;
 }
 
 
@@ -554,7 +627,7 @@ module.exports = {
     resetTestDB,
     checkDBExists, setTargetDB, checkTablesExist,
     getVenue, getVenues,
-    addUser, activateUser, deactivateUser, getUser, getUserByEmail, getUserByUserName, getUsers, 
+    addUser, activateUser, deactivateUser, getUser, getUserByEmail, getUserByUserName, getUsers,
     getUserRole,
     getUserAccountStatus,
     getUserFavourites, addUserFavourite, removeUserFavourite

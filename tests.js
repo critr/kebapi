@@ -1,8 +1,8 @@
 ﻿/**
  * A quick, home brew asynchronous test runner that performs and logs various tests against our REST API and other modules.
- * 
+ *
  * Uses the Node JS built-in assert library to evaluate test cases.
- * 
+ *
  * */
 
 'use strict';
@@ -52,7 +52,7 @@ const { pick } = require('./helper-obj');
 // Collection of tests. Each test can run 1+ test cases. Each with varying asserts.
 // These tests are intended to be run only by an admin-level account.
 const adminTestCollection = {
-    /* TODO: 'test' arg is the name of the test, which we should be able to get from some 
+    /* TODO: 'test' arg is the name of the test, which we should be able to get from some
      * flavour of Object.keys/entries(this) instead of passing it in.*/
     /* TODO: Weigh abstracting out the calls to runTestCases and making this a pure data structure.
      */
@@ -199,12 +199,12 @@ const adminTestCollection = {
 
         return await runTestCases(test, testCases);
     },
-    /* TODO: This commented out test uses Object Destructuring and Property Shorthand, and might 
-        * be a cleaner implemtation. However, refactoring it into a fn with a shorthand arg hasn't been 
-        * possible so far. i.e. how to call: 
-        * 
+    /* TODO: This commented out test uses Object Destructuring and Property Shorthand, and might
+        * be a cleaner implemtation. However, refactoring it into a fn with a shorthand arg hasn't been
+        * possible so far. i.e. how to call:
+        *
         * fn(arg1, arg2, {id, name})
-        * 
+        *
         * without the third arg, which is Property Shorthand, being interpreted as an object without
         * values? Review.
         * */
@@ -769,15 +769,18 @@ const adminTestCollection = {
                     "response": [
                         {
                             "id": 2,
-                            "name": "The Kebaberie"
+                            "name": "The Kebaberie",
+                            "main_media_path": "image2.jpg"
                         },
                         {
                             "id": 3,
-                            "name": "Meats Peeps"
+                            "name": "Meats Peeps",
+                            "main_media_path": "image3.jpg"
                         },
                         {
                             "id": 4,
-                            "name": "The Rotisserie"
+                            "name": "The Rotisserie",
+                            "main_media_path": "image4.jpg"
                         }
                     ]
                 },
@@ -792,11 +795,13 @@ const adminTestCollection = {
                     "response": [
                         {
                             "id": 5,
-                            "name": "The Dirty One"
+                            "name": "The Dirty One",
+                            "main_media_path": "image5.jpg"
                         },
                         {
                             "id": 6,
-                            "name": "Bodrum Conundrum"
+                            "name": "Bodrum Conundrum",
+                            "main_media_path": "image6.jpg"
                         }
                     ]
                 },
@@ -811,19 +816,23 @@ const adminTestCollection = {
                     "response": [
                         {
                             "id": 1,
-                            "name": "Splendid Kebabs"
+                            "name": "Splendid Kebabs",
+                            "main_media_path": "image1.jpg"
                         },
                         {
                             "id": 2,
-                            "name": "The Kebaberie"
+                            "name": "The Kebaberie",
+                            "main_media_path": "image2.jpg"
                         },
                         {
                             "id": 3,
-                            "name": "Meats Peeps"
+                            "name": "Meats Peeps",
+                            "main_media_path": "image3.jpg"
                         },
                         {
                             "id": 4,
-                            "name": "The Rotisserie"
+                            "name": "The Rotisserie",
+                            "main_media_path": "image4.jpg"
                         }
                     ]
                 },
@@ -838,27 +847,33 @@ const adminTestCollection = {
                     "response": [
                         {
                             "id": 1,
-                            "name": "Splendid Kebabs"
+                            "name": "Splendid Kebabs",
+                            "main_media_path": "image1.jpg"
                         },
                         {
                             "id": 2,
-                            "name": "The Kebaberie"
+                            "name": "The Kebaberie",
+                            "main_media_path": "image2.jpg"
                         },
                         {
                             "id": 3,
-                            "name": "Meats Peeps"
+                            "name": "Meats Peeps",
+                            "main_media_path": "image3.jpg"
                         },
                         {
                             "id": 4,
-                            "name": "The Rotisserie"
+                            "name": "The Rotisserie",
+                            "main_media_path": "image4.jpg"
                         },
                         {
                             "id": 5,
-                            "name": "The Dirty One"
+                            "name": "The Dirty One",
+                            "main_media_path": "image5.jpg"
                         },
                         {
                             "id": 6,
-                            "name": "Bodrum Conundrum"
+                            "name": "Bodrum Conundrum",
+                            "main_media_path": "image6.jpg"
                         }
                     ]
                 },
@@ -873,27 +888,33 @@ const adminTestCollection = {
                     "response": [
                         {
                             "id": 1,
-                            "name": "Splendid Kebabs"
+                            "name": "Splendid Kebabs",
+                            "main_media_path": "image1.jpg"
                         },
                         {
                             "id": 2,
-                            "name": "The Kebaberie"
+                            "name": "The Kebaberie",
+                            "main_media_path": "image2.jpg"
                         },
                         {
                             "id": 3,
-                            "name": "Meats Peeps"
+                            "name": "Meats Peeps",
+                            "main_media_path": "image3.jpg"
                         },
                         {
                             "id": 4,
-                            "name": "The Rotisserie"
+                            "name": "The Rotisserie",
+                            "main_media_path": "image4.jpg"
                         },
                         {
                             "id": 5,
-                            "name": "The Dirty One"
+                            "name": "The Dirty One",
+                            "main_media_path": "image5.jpg"
                         },
                         {
                             "id": 6,
-                            "name": "Bodrum Conundrum"
+                            "name": "Bodrum Conundrum",
+                            "main_media_path": "image6.jpg"
                         }
                     ]
                 },
@@ -908,27 +929,33 @@ const adminTestCollection = {
                     "response": [
                         {
                             "id": 1,
-                            "name": "Splendid Kebabs"
+                            "name": "Splendid Kebabs",
+                            "main_media_path": "image1.jpg"
                         },
                         {
                             "id": 2,
-                            "name": "The Kebaberie"
+                            "name": "The Kebaberie",
+                            "main_media_path": "image2.jpg"
                         },
                         {
                             "id": 3,
-                            "name": "Meats Peeps"
+                            "name": "Meats Peeps",
+                            "main_media_path": "image3.jpg"
                         },
                         {
                             "id": 4,
-                            "name": "The Rotisserie"
+                            "name": "The Rotisserie",
+                            "main_media_path": "image4.jpg"
                         },
                         {
                             "id": 5,
-                            "name": "The Dirty One"
+                            "name": "The Dirty One",
+                            "main_media_path": "image5.jpg"
                         },
                         {
                             "id": 6,
-                            "name": "Bodrum Conundrum"
+                            "name": "Bodrum Conundrum",
+                            "main_media_path": "image6.jpg"
                         }
                     ]
                 },
@@ -966,7 +993,7 @@ async function runAdminTests() {
 }
 
 /*
- * Runs all tests in testCollection, and builds summary with stats 
+ * Runs all tests in testCollection, and builds summary with stats
  */
 async function runTests(testCollection = {}) {
     try {
@@ -1002,8 +1029,8 @@ async function runTests(testCollection = {}) {
     }
 }
 
-/* 
- * Executes an assert fn without throwing all over the shop. 
+/*
+ * Executes an assert fn without throwing all over the shop.
  */
 async function runAssert(assertFn, actual, expected) {
     let assertSucceeded = false;
@@ -1017,7 +1044,7 @@ async function runAssert(assertFn, actual, expected) {
     return assertSucceeded;
 }
 
-/* 
+/*
  *  Runs all test cases passed in against against the specified test function, and
  *  asserts its result against expected output, using the specified assert function.
  *  Returns flag indicating whether all test cases in the test succeeded, together with
@@ -1054,7 +1081,7 @@ async function runTestCases(test, testCases) {
 
 /*
  * Helper. Returns subset of obj where keys match.
- * e.g. if 
+ * e.g. if
  *      obj = { id: 1, name: 'bob', username: 'bob23'}
  * and we call
  *      getResultSubset(obj, ['id', 'name'])
@@ -1072,6 +1099,3 @@ function getResultSubset(obj = {}, keys = []) {
 
 
 module.exports = { runAdminTests };
-
-
-
