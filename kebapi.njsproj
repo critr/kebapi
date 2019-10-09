@@ -16,7 +16,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>46aeb387-bb5d-4914-81a8-3b1a59bcb248</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>scripts\runTests.js</StartupFile>
+    <StartupFile>server.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
