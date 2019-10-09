@@ -802,6 +802,26 @@ const adminTestCollection = {
                             "id": 6,
                             "name": "Bodrum Conundrum",
                             "main_media_path": "image6.jpg"
+                        },
+                        {
+                            "id": 7,
+                            "name": "Korner Kebab",
+                            "main_media_path": "image7.jpg"
+                        },
+                        {
+                            "id": 8,
+                            "name": "Star Kebab",
+                            "main_media_path": "image8.jpg"
+                        },
+                        {
+                            "id": 9,
+                            "name": "Kebab Slab",
+                            "main_media_path": "image9.jpg"
+                        },
+                        {
+                            "id": 10,
+                            "name": "Turku Kebabi",
+                            "main_media_path": "image10.jpg"
                         }
                     ]
                 },
@@ -874,6 +894,26 @@ const adminTestCollection = {
                             "id": 6,
                             "name": "Bodrum Conundrum",
                             "main_media_path": "image6.jpg"
+                        },
+                        {
+                            "id": 7,
+                            "name": "Korner Kebab",
+                            "main_media_path": "image7.jpg"
+                        },
+                        {
+                            "id": 8,
+                            "name": "Star Kebab",
+                            "main_media_path": "image8.jpg"
+                        },
+                        {
+                            "id": 9,
+                            "name": "Kebab Slab",
+                            "main_media_path": "image9.jpg"
+                        },
+                        {
+                            "id": 10,
+                            "name": "Turku Kebabi",
+                            "main_media_path": "image10.jpg"
                         }
                     ]
                 },
@@ -915,6 +955,11 @@ const adminTestCollection = {
                             "id": 6,
                             "name": "Bodrum Conundrum",
                             "main_media_path": "image6.jpg"
+                        },
+                        {
+                            "id": 7,
+                            "name": "Korner Kebab",
+                            "main_media_path": "image7.jpg"
                         }
                     ]
                 },
@@ -956,6 +1001,26 @@ const adminTestCollection = {
                             "id": 6,
                             "name": "Bodrum Conundrum",
                             "main_media_path": "image6.jpg"
+                        },
+                        {
+                            "id": 7,
+                            "name": "Korner Kebab",
+                            "main_media_path": "image7.jpg"
+                        },
+                        {
+                            "id": 8,
+                            "name": "Star Kebab",
+                            "main_media_path": "image8.jpg"
+                        },
+                        {
+                            "id": 9,
+                            "name": "Kebab Slab",
+                            "main_media_path": "image9.jpg"
+                        },
+                        {
+                            "id": 10,
+                            "name": "Turku Kebabi",
+                            "main_media_path": "image10.jpg"
                         }
                     ]
                 },

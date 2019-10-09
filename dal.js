@@ -248,7 +248,11 @@ async function insertTestData() {
             (3, 1, 'image\\3.jpg'),
             (4, 1, 'image\\4.jpg'),
             (5, 1, 'image\\5.jpg'),
-            (6, 1, 'image\\6.jpg')
+            (6, 1, 'image\\6.jpg'),
+            (7, 1, 'image\\7.jpg'),
+            (8, 1, 'image\\8.jpg'),
+            (9, 1, 'image\\9.jpg'),
+            (10, 1, 'image\\10.jpg')
             ;
         `, [DbTable.MEDIA]);
 
@@ -260,7 +264,11 @@ async function insertTestData() {
             (3, 'Meats Peeps', 7, 8, '276 Rita St, Madrid', 4, 3),
             (4, 'The Rotisserie', 1, 9, '7 Rick Road, Madrid', 3, 4),
             (5, 'The Dirty One', 4, 1, '10 Banana Place, Madrid', 5, 5),
-            (6, 'Bodrum Conundrum', 5, 5, '55 High Five Drive, Madrid', 2, 6)
+            (6, 'Bodrum Conundrum', 5, 5, '55 High Five Drive, Madrid', 2, 6),
+            (7, 'Korner Kebab', 3, 1, '11b Indy Place, Madrid', 1, 7),
+            (8, 'Star Kebab', 3, 6, '222 Crispy Crescent, Madrid', 4, 8),
+            (9, 'Kebab Slab', 5, 7, '5 Five Drive, Madrid', 3, 9),
+            (10, 'Turku Kebabi', 5, 7, '21B Baker Street, Madrid', 5, 10)
             ;
         `, [DbTable.VENUES]);
 
@@ -608,7 +616,7 @@ function parseStartRow(startRow) {
     return Number(startRow) || 0;
 }
 function parseMaxRows(maxRows) {
-    return Number(maxRows) <= KEBAPI_DB_DEFAULT_SELECT_MAX_ROWS ? maxRows : KEBAPI_DB_DEFAULT_SELECT_MAX_ROWS;
+    return Number(maxRows) <= KEBAPI_DB_DEFAULT_SELECT_MAX_ROWS ? Number(maxRows) : KEBAPI_DB_DEFAULT_SELECT_MAX_ROWS;
 }
 
 /* - - - - - Other helpers - - - - - */
