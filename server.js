@@ -402,7 +402,7 @@ async function getPostData(req) {
     let data = '';
     return new Promise((resolve, reject) => {
         // Reject if we're not receiving one of the accepted content-types
-        if (![APP_FORM_URLENCODED, APP_JSON].includes(req.headers['content-type'])) {
+        if (![APP_FORM_URLENCODED, APP_JSON].some(s => req.headers['content-type'].indexOf(s))) {
             reject(`POST data content-type must be '${APP_FORM_URLENCODED}' or '${APP_JSON}', instead received '${req.headers['content-type']}'`);
         }
         // Receive data chunks
@@ -421,10 +421,10 @@ async function getPostData(req) {
             // guard against that, in addition to choosing the type of parsing required.
             let parsedData = undefined; 
             try {
-                if (contentType === APP_FORM_URLENCODED) {
+                if (contentType.indexOf(APP_FORM_URLENCODED) > -1) {
                     // Parse as Form data
                     parsedData = qs.parse(data);
-                } else if (contentType === APP_JSON) {
+                } else if (contentType.indexOf(APP_JSON) > -1) {
                     // Parse as JSON data
                     parsedData = JSON.parse(data);
                 }
