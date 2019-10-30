@@ -130,7 +130,7 @@ async function loginUser({ username, email, password } = {}) {
                 } else {
                     let token = await auth.getToken(user.id);
                     responseCode = responseCodes.OK;
-                    result = token;
+                    result = { token: token, user: user };
                 }
             }
         }
