@@ -4,7 +4,7 @@
  * (This Action can also be run from the server. This is an alternative.)
  * */
 
-const tests = require('../tests');
+const tests = require('../../tests');
 
 (async () => {
     let result;

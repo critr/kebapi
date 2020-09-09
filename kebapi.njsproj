@@ -16,7 +16,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>46aeb387-bb5d-4914-81a8-3b1a59bcb248</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>server.js</StartupFile>
+    <StartupFile>src\server.js</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -33,37 +33,38 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="api.js" />
-    <Content Include="auth.js">
+    <Content Include="src\api.js" />
+    <Content Include="src\auth.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="config.js">
+    <Content Include="src\config.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="dal.js" />
-    <Content Include="command-line.js" />
-    <Content Include="helper-obj.js" />
-    <Content Include="helper-env.js">
+    <Content Include="src\dal.js" />
+    <Content Include="src\command-line.js" />
+    <Content Include="src\helper-obj.js" />
+    <Content Include="src\helper-env.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="errors.js">
+    <Content Include="src\errors.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="logger.js" />
-    <Content Include="roles.js">
+    <Content Include="src\logger.js" />
+    <Content Include="src\roles.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="scripts\runTests.js" />
-    <Content Include="scripts\resetTestDB.js">
+    <Content Include="src\scripts\runTests.js" />
+    <Content Include="src\scripts\resetTestDB.js">
       <SubType>Code</SubType>
     </Content>
-    <Content Include="server.js" />
+    <Content Include="src\server.js" />
     <Content Include="package.json" />
     <Content Include="README.md" />
-    <Content Include="tests.js" />
+    <Content Include="src\tests.js" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="scripts\" />
+    <Folder Include="src\" />
+    <Folder Include="src\scripts\" />
   </ItemGroup>
   <Import Project="$(VSToolsPath)\Node.js Tools\Microsoft.NodejsToolsV2.targets" />
   <ProjectExtensions>
