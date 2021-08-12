@@ -1,18 +1,41 @@
-﻿# kebapi
+# kebapi
+
+<br>
+<br>
+
+<blockquote>
+<p align="center">
 <span style="font-size:1.4rem;">An asynchronous Promise-based vanilla Node.js REST API, specifically written without the usual frameworks to explore core Node.js, and to satisfy a not-so-secret lust for dirty kebabs!</span>
+</p>
+</blockquote>
 
-<p style="text-align:center;font-size:4rem;">🥙</p>
+<br>
 
-The purpose of the API is to implement a small set of operations that can serve discerning kebab-eating clients everywhere.
+<p align="center">
+  <img src="doc/kebab-30deg.svg" width="200" />
+</p>
+
+<br>
+<br>
+
+The purpose of the API is to implement a small set of operations that can serve discerning kebab-eating clients everywhere. (There is a juicy [ASP.NET version](https://github.com/critr/KebapiAspNet) too!)
 
 The API fronts a MySQL database, and the project includes home-brewed implementations of routing, logins replete with user roles and permissions, command line handling, a fairly dandy test-runner with a whole bunch of unit tests, and a coloured logger that formats and highlights output consistently and nicely. Login and security are built upon bcrypt and JSON Web Tokens. (bcryptjs, jsonwebtoken, and mysql are the only external libs used.) Config is entirely Environment-based.
 
 On the data side, there are scripted rebuilds of the database schema, including test data loading (both triggerable in Dev-mode from the API), and the database model includes typical normalisation and PK/FK/data integrity constraints.
 
+Here's a quick demo video of kebapi with its media server powering an early protoype Android/Flutter front-end:
+
+https://user-images.githubusercontent.com/28576622/129194364-bcaf4a9e-435a-4065-bb83-76cffe326d94.mp4
+
+You can just about see kebapi logging as it responds to user input on the device.
+
+
+
 ### 🥙 Get started
 You will need a [MySQL](https://www.mysql.com/) database server running.
 
-Download the kebapi repo. 
+Download the kebapi repo.
 
 Then, if it's the fist run, you'll probably need to set up the database and load some data. To do that, go to the project root and in your bash/command prompt hit:
 
@@ -109,4 +132,11 @@ Should you have problems connecting to the MySQL database, check the user is set
 ```
 You may need to run one of those queries in MySQL Workbench. Be sure to substitute the correct user for the one you've set up in MySQL.
 
-<p style="text-align:center;font-size:5rem">🥙</p>
+<br>
+
+<p align="center">
+  <img src="doc/kebab2.svg" width="200" />
+</p>
+<br>
+
+<sub>Some tastefully sourced kebab icons slightly tweaked by [critr](https://github.com/critr) and lovingly made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></sub>
